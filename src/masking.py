@@ -69,10 +69,10 @@ def mask_input(li):
     be = {}
     for d in dis:
         for mask in d:
-            be[mask['entity_group']] = ([mask['start'],mask['end']])
-    be = dict(sorted(be.items(), reverse=True, key=lambda x:x[1]))
+            be[(mask['start'],mask['end'])] = mask['entity_group']
+    be = dict(sorted(be.items(), reverse=True))
     txt = res
-    for rep,slice in be.items():
+    for slice,rep in be.items():
         txt = txt[0:slice[0]] + rep + txt[slice[1]:]
     return txt
 
