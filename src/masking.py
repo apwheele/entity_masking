@@ -37,7 +37,7 @@ def ord_unique(series):
 
 
 # This is to make the tokenized entitys in a nicer wide format
-def token_wide(text, lab_map=lab_map, lab_keep=lab_keep, fin_dict=fin_dict, classifier=classifier, thresh=0.6):
+def token_wide(text, lab_map=lab_map, lab_keep=lab_keep, fin_dict=fin_dict, classifier=classifier, thresh=0.9):
     res = classifier(text,aggregation_strategy="simple")  # could also use max or average
     fd2 = fin_dict.copy()
     if len(res) > 0:

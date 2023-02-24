@@ -8,10 +8,6 @@ Illustration of entity masking functions for use with sensitive online forum dat
  - social security numbers
  - bank account numbers
 
+It also does fuzzy name matching, so if 'Andy Wheeler' is mentioned one place, and 'Andrew Wheeler' is mentioned another, it will match those two inputs to the same masked token.
+
 Andy Wheeler
-
--------
-
-ToDo
-
- - take in names for entire set, and do fuzzy name matching + return consistent ID
