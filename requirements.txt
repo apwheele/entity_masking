@@ -1,6 +1,10 @@
 # conda create --name masking python=3.9 pip
 # conda activate masking
 # pip install -r requirements.txt
+
 pandas
 transformers
 jupyter
+networkx
+polyleven
+numpy

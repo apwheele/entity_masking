@@ -9,3 +9,9 @@ Illustration of entity masking functions for use with sensitive online forum dat
  - bank account numbers
 
 Andy Wheeler
+
+-------
+
+ToDo
+
+ - take in names for entire set, and do fuzzy name matching + return consistent ID

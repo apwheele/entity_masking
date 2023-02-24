@@ -1,3 +1,5 @@
 # gitignore python stuff
 */__pycache__/*
 
+# personal notes
+notes.txt

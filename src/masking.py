@@ -6,6 +6,8 @@ provided model
 
 from transformers import pipeline
 import pandas as pd
+from . import fuzzy
+from itertools import chain
 
 # Import the classifier, should do it one time and then cache the model
 classifier = pipeline("token-classification",model="StanfordAIMI/stanford-deidentifier-base")
@@ -47,7 +49,6 @@ def token_wide(text, lab_map=lab_map, lab_keep=lab_keep, fin_dict=fin_dict, clas
         for e in ent:
             lpd = res_pd[res_pd['entity_group'] == e].reset_index(drop=True)
             ordval = ord_unique(lpd['word'])
-            # logic here, if you have exact same, collapse them to the same number
             lpd['entity_group'] = lpd['entity_group'] + ordval
             fd2[e] = lpd.to_dict(orient='records')
     return fd2
@@ -76,6 +77,22 @@ def mask_input(li):
         txt = txt[0:slice[0]] + rep + txt[slice[1]:]
     return txt
 
+# This uses the fuzzy logic to replace
+# matched strings with similar matches
+def rep_match(data,field):
+    # if empty, don't do anything
+    fl = data[field].apply(len)
+    if fl.max() == 0:
+        pass
+    else:
+        res = data[field].values
+        res_df = pd.DataFrame(chain(*res))
+        res_map = fuzzy.res_map(res_df,'word',res_map=True)
+        # Now replacing the initial words
+        for row in res:
+            for m in row:
+                m['entity_group'] = field + res_map[m['word']]
+
 # Final function, takes in input dataframe and does the masking
 # plus returns the entities
 def mask_dataframe(data,
@@ -87,21 +104,25 @@ def mask_dataframe(data,
     fin_tokens = list(set(lab_map.values()))
     fin_dict = {k: [] for k in fin_tokens}
     rt = ner_data(data,text_field,lab_map,lab_keep,fin_dict)
+    # doing the fuzzy matching
+    for v in mask_fields:
+        rep_match(rt,v)
+    # now doing the name masking
     rt[text_field] = data[text_field]
     rt = rt[[text_field] + mask_fields]
     rt[text_field] = rt.apply(mask_input,axis=1)
     return rt
-
 
 ##############################################
 ## Illustrative single dataset to check
 #
 #t1 = "Andy Wheeler is a birder 190682540 where I live 100 Main St Kansas with Joe Schmo and andy wheeler"
 #t2 = "Scott Jacques is an interesting fellow, his check number 18887623597 is a good one."
-#t3 = "lol, what a noob"
-#text_li = [t1,t2,t3]
-#id = [1,2,3]
+#t3 = "lol, what a noob, Atlanta GA is on fire"
+#t4 = "so what, andrew wheeler @ 100 main st kansas is not so bad"
+#text_li = [t1,t2,t3,t4]
+#id = [1,2,3,4]
 #
-#test_df = pd.DataFrame(zip(id,text_li),columns=['ID','Text'], index=['a','b','c'])
+#test_df = pd.DataFrame(zip(id,text_li),columns=['ID','Text'], index=['a','b','c','e'])
 #mask_dataframe(test_df,'Text')
 ##############################################
