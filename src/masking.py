@@ -27,18 +27,27 @@ lab_keep = list(lab_map.keys())
 fin_tokens = list(set(lab_map.values()))
 fin_dict = {k: [] for k in fin_tokens}
 
+# Doing exact matches for now
+def ord_unique(series):
+    un = pd.unique(series)
+    rep = {u:str(i+1) for i,u in enumerate(un)}
+    return series.replace(rep)
+
+
 # This is to make the tokenized entitys in a nicer wide format
-def token_wide(text, lab_map=lab_map, lab_keep=lab_keep, fin_dict=fin_dict, classifier=classifier):
-    res = classifier(text,aggregation_strategy="simple")
+def token_wide(text, lab_map=lab_map, lab_keep=lab_keep, fin_dict=fin_dict, classifier=classifier, thresh=0.6):
+    res = classifier(text,aggregation_strategy="simple")  # could also use max or average
     fd2 = fin_dict.copy()
     if len(res) > 0:
         res_pd = pd.DataFrame(res)
         res_pd = res_pd[res_pd['entity_group'].isin(lab_keep)].copy()
+        res_pd = res_pd[res_pd['score'] >= thresh].copy()
         res_pd['entity_group'].replace(lab_map,inplace=True)
         ent = pd.unique(res_pd['entity_group'])
         for e in ent:
             lpd = res_pd[res_pd['entity_group'] == e].reset_index(drop=True)
-            ordval = (lpd.index + 1).astype(str)
+            ordval = ord_unique(lpd['word'])
+            # logic here, if you have exact same, collapse them to the same number
             lpd['entity_group'] = lpd['entity_group'] + ordval
             fd2[e] = lpd.to_dict(orient='records')
     return fd2
@@ -87,7 +96,7 @@ def mask_dataframe(data,
 ##############################################
 ## Illustrative single dataset to check
 #
-#t1 = "Andy Wheeler is a birder 190682540 where I live 100 Main St with Joe Schmo"
+#t1 = "Andy Wheeler is a birder 190682540 where I live 100 Main St Kansas with Joe Schmo and andy wheeler"
 #t2 = "Scott Jacques is an interesting fellow, his check number 18887623597 is a good one."
 #t3 = "lol, what a noob"
 #text_li = [t1,t2,t3]
