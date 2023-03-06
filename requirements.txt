@@ -8,3 +8,4 @@ jupyter
 networkx
 polyleven
 numpy
+beautifulsoup4
