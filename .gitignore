@@ -4,4 +4,8 @@
 # personal notes
 notes.txt
 
+# do not include the data they sent
 /data/*
+
+# but include the code used to parse the HTML files
+!/data/read_html.py
