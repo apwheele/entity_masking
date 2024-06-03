@@ -4,13 +4,19 @@ text sanitization based on
 provided model
 '''
 
-from transformers import pipeline
 import pandas as pd
 from . import fuzzy
 from itertools import chain
+import torch
+from transformers import pipeline
+
+if torch.cuda.is_available():
+    device = "cuda"
+else:
+    device = "cpu"
 
 # Import the classifier, should do it one time and then cache the model
-classifier = pipeline("token-classification",model="StanfordAIMI/stanford-deidentifier-base")
+classifier = pipeline("token-classification",model="StanfordAIMI/stanford-deidentifier-base",device=device)
 
 # I collapse some of the Stanford AIML categories
 lab_map = {'PATIENT': 'PersonName',
@@ -36,7 +42,7 @@ def ord_unique(series):
     return series.replace(rep)
 
 
-# This is to make the tokenized entitys in a nicer wide format
+# This is to make the tokenized entities in a nicer wide format
 def token_wide(text, lab_map=lab_map, lab_keep=lab_keep, fin_dict=fin_dict, classifier=classifier, thresh=0.9):
     res = classifier(text,aggregation_strategy="simple")  # could also use max or average
     fd2 = fin_dict.copy()
@@ -44,7 +50,7 @@ def token_wide(text, lab_map=lab_map, lab_keep=lab_keep, fin_dict=fin_dict, clas
         res_pd = pd.DataFrame(res)
         res_pd = res_pd[res_pd['entity_group'].isin(lab_keep)].copy()
         res_pd = res_pd[res_pd['score'] >= thresh].copy()
-        res_pd['entity_group'].replace(lab_map,inplace=True)
+        res_pd['entity_group'] = res_pd['entity_group'].replace(lab_map)
         ent = pd.unique(res_pd['entity_group'])
         for e in ent:
             lpd = res_pd[res_pd['entity_group'] == e].reset_index(drop=True)

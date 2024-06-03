@@ -2,6 +2,11 @@
 # conda activate masking
 # pip install -r requirements.txt
 
+# Note you also need to install pytorch, you need
+# to figure out your local setup though to do that
+# e.g. GPU/CPU etc., so my machine is currently
+# conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+
 pandas
 transformers
 jupyter
@@ -9,3 +14,4 @@ networkx
 polyleven
 numpy
 beautifulsoup4
+scipy

@@ -7,12 +7,9 @@ from polyleven import levenshtein
 import networkx as nx
 import numpy as np
 
-def norm_leven(x):
-    return len(x)
-
 # Normalized levenshtein
 def norm_leven(x):
-    a, b = x[0], x[1]
+    a, b = x.iloc[0], x.iloc[1]
     ldist = levenshtein(a,b)
     # This is to prevent matching very tiny strings
     # min length is 4 characters

@@ -9,3 +9,6 @@ notes.txt
 
 # but include the code used to parse the HTML files
 !/data/read_html.py
+!/data/README.md
+!/data/Text.zip
+
