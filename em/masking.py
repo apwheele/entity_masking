@@ -70,8 +70,8 @@ def ner_data(data,text_field,lab_map=lab_map, lab_keep=lab_keep, fin_dict=fin_di
 # Specialized function for applying to text in dataframe
 # assumes first column is text, and the rest are dictionaries
 def mask_input(li):
-    res = li[0]
-    dis = li[1:]
+    res = li.iloc[0]
+    dis = li.iloc[1:]
     # getting all of the begin/end parts in one go
     be = {}
     for d in dis:
@@ -85,7 +85,7 @@ def mask_input(li):
 
 # This uses the fuzzy logic to replace
 # matched strings with similar matches
-def rep_match(data,field):
+def rep_match(data,field,thresh=0.2):
     # if empty, don't do anything
     fl = data[field].apply(len)
     if fl.max() == 0:
@@ -93,7 +93,7 @@ def rep_match(data,field):
     else:
         res = data[field].values
         res_df = pd.DataFrame(chain(*res))
-        res_map = fuzzy.res_map(res_df,'word',res_map=True)
+        res_map = fuzzy.res_map(res_df,'word',thresh=thresh,res_map=True)
         # Now replacing the initial words
         for row in res:
             for m in row:
@@ -105,14 +105,15 @@ def mask_dataframe(data,
                    text_field,
                    mask_fields=['Contact', 'Geo', 'IdentNumber', 'PersonName'],
                    lab_map=lab_map,
-                   classifier=classifier):
+                   classifier=classifier,
+                   thresh=0.2):
     lab_keep = list(lab_map.keys())
     fin_tokens = list(set(lab_map.values()))
     fin_dict = {k: [] for k in fin_tokens}
     rt = ner_data(data,text_field,lab_map,lab_keep,fin_dict)
     # doing the fuzzy matching
     for v in mask_fields:
-        rep_match(rt,v)
+        rep_match(rt,v,thresh)
     # now doing the name masking
     rt[text_field] = data[text_field]
     rt = rt[[text_field] + mask_fields]

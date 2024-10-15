@@ -56,3 +56,26 @@ def res_map(data,field,thresh=0.2,func=norm_leven,res_map=False):
         return res_map
     else:
         return data[field].replace(res_map)
+
+
+#import duckdb
+#
+#d2 = data[[field]].copy()
+#d2['n'] = 1
+#d2.columns = ['field','n']
+#d2 = d2.groupby(field,as_index=False)['n'].size()
+#duckdb.sql("CREATE TABLE d AS SELECT * FROM d2")
+#
+#match_query = '''
+#SELECT
+# l.field AS lf,
+# r.field as rf,
+# damerau_levenshtein(l.field,r.field) AS dl
+#FROM d AS l
+#CROSS JOIN d AS r
+#WHERE l.field < r.field
+#  AND damerau_levenshtein(l.field,r.field) < 3
+#'''
+#
+# by the time you get to 3, it is pretty 
+#res_pairs = duckdb.sql(match_query).df()
